@@ -1,0 +1,229 @@
+ <!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Advanced To-Do App</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#232526,#414345);
+  display:flex;
+  justify-content:center;
+  padding:40px;
+  color:#fff;
+}
+
+.container{
+  background:#ffffff;
+  color:#000;
+  width:900px;
+  padding:30px;
+  border-radius:15px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.3);
+}
+
+h1{
+  text-align:center;
+}
+
+.input-section{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-bottom:30px;
+}
+
+input, textarea{
+  padding:10px;
+  font-size:15px;
+  border-radius:5px;
+  border:1px solid #ccc;
+}
+
+textarea{
+  resize:none;
+  height:60px;
+}
+
+button{
+  padding:8px 12px;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+.add-btn{
+  background:#28a745;
+  color:white;
+  width:150px;
+}
+
+.section{
+  margin-top:25px;
+}
+
+.section h2{
+  border-bottom:2px solid #ccc;
+  padding-bottom:5px;
+}
+
+.task{
+  background:#f4f4f4;
+  padding:15px;
+  margin:15px 0;
+  border-radius:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+}
+
+.task-info{
+  max-width:65%;
+}
+
+.task-title{
+  font-weight:bold;
+  font-size:16px;
+}
+
+.task-notes{
+  margin-top:5px;
+  font-size:14px;
+  color:#444;
+}
+
+.task small{
+  display:block;
+  font-size:12px;
+  color:gray;
+  margin-top:4px;
+}
+
+.actions button{
+  margin-left:5px;
+}
+
+.complete-btn{ background:#007bff; color:white; }
+.edit-btn{ background:#ffc107; }
+.delete-btn{ background:#dc3545; color:white; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>To-Do App</h1>
+
+  <div class="input-section">
+    <input type="text" id="taskTitle" placeholder="Task Title">
+    <textarea id="taskNotes" placeholder="Task Notes (optional)"></textarea>
+    <button class="add-btn" onclick="addTask()">Add Task</button>
+  </div>
+
+  <div class="section">
+    <h2>Pending Tasks</h2>
+    <div id="pendingList"></div>
+  </div>
+
+  <div class="section">
+    <h2>Completed Tasks</h2>
+    <div id="completedList"></div>
+  </div>
+
+</div>
+
+<script>
+function getTime(){
+  return new Date().toLocaleString();
+}
+
+function addTask(){
+  const title = document.getElementById("taskTitle").value.trim();
+  const notes = document.getElementById("taskNotes").value.trim();
+
+  if(title === "") return;
+
+  const task = {
+    title,
+    notes,
+    addedAt: getTime(),
+    completedAt: null
+  };
+
+  createTask(task,false);
+
+  document.getElementById("taskTitle").value="";
+  document.getElementById("taskNotes").value="";
+}
+
+function createTask(task,isCompleted){
+  const taskDiv=document.createElement("div");
+  taskDiv.className="task";
+
+  const info=document.createElement("div");
+  info.className="task-info";
+  renderInfo();
+
+  function renderInfo(){
+    info.innerHTML=`
+      <div class="task-title">${task.title}</div>
+      ${task.notes ? `<div class="task-notes">${task.notes}</div>` : ""}
+      <small>Added: ${task.addedAt}</small>
+      ${task.completedAt ? `<small>Completed: ${task.completedAt}</small>` : ""}
+    `;
+  }
+
+  const actions=document.createElement("div");
+  actions.className="actions";
+
+  const editBtn=document.createElement("button");
+  editBtn.className="edit-btn";
+  editBtn.textContent="Edit";
+  editBtn.onclick=function(){
+    const newTitle=prompt("Edit Title:",task.title);
+    if(newTitle!==null && newTitle.trim()!==""){
+      task.title=newTitle.trim();
+    }
+    const newNotes=prompt("Edit Notes:",task.notes);
+    if(newNotes!==null){
+      task.notes=newNotes.trim();
+    }
+    renderInfo();
+  };
+
+  const deleteBtn=document.createElement("button");
+  deleteBtn.className="delete-btn";
+  deleteBtn.textContent="Delete";
+  deleteBtn.onclick=function(){
+    taskDiv.remove();
+  };
+
+  actions.appendChild(editBtn);
+  actions.appendChild(deleteBtn);
+
+  if(!isCompleted){
+    const completeBtn=document.createElement("button");
+    completeBtn.className="complete-btn";
+    completeBtn.textContent="Complete";
+    completeBtn.onclick=function(){
+      task.completedAt=getTime();
+      taskDiv.remove();
+      renderInfo();
+      document.getElementById("completedList").appendChild(taskDiv);
+      completeBtn.remove();
+    };
+    actions.appendChild(completeBtn);
+    document.getElementById("pendingList").appendChild(taskDiv);
+  }else{
+    document.getElementById("completedList").appendChild(taskDiv);
+  }
+
+  taskDiv.appendChild(info);
+  taskDiv.appendChild(actions);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,181 @@
+ <!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Simple Auth System</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(135deg,#4e73df,#1cc88a);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.container{
+  background:white;
+  width:380px;
+  padding:30px;
+  border-radius:10px;
+  box-shadow:0 15px 30px rgba(0,0,0,0.2);
+  text-align:center;
+  max-height:90vh;
+  overflow-y:auto;
+}
+
+h2{
+  margin-bottom:15px;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  background:#4e73df;
+  color:white;
+  border:none;
+  cursor:pointer;
+  margin-top:10px;
+}
+
+.toggle{
+  margin-top:15px;
+  color:#4e73df;
+  cursor:pointer;
+}
+
+.secured{
+  display:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div id="authSection">
+  <h2 id="formTitle">Login</h2>
+
+  <div id="registerFields" style="display:none;">
+    <input type="text" id="fullname" placeholder="Full Name">
+    <input type="email" id="email" placeholder="Email">
+    <input type="text" id="phone" placeholder="Phone Number">
+  </div>
+
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <input type="password" id="confirmPassword" placeholder="Confirm Password" style="display:none;">
+
+  <button onclick="handleAuth()" id="mainBtn">Login</button>
+
+  <div class="toggle" onclick="toggleForm()" id="toggleText">
+    Don't have an account? Register
+  </div>
+</div>
+
+<div class="secured" id="securedSection">
+  <h2>Welcome</h2>
+  <p id="welcomeUser"></p>
+  <button onclick="logout()">Logout</button>
+</div>
+
+</div>
+
+<script>
+let isLogin = true;
+
+function toggleForm(){
+  isLogin = !isLogin;
+
+  document.getElementById("formTitle").textContent = isLogin ? "Login" : "Register";
+  document.getElementById("mainBtn").textContent = isLogin ? "Login" : "Register";
+  document.getElementById("toggleText").textContent =
+    isLogin ? "Don't have an account? Register" : "Already have an account? Login";
+
+  document.getElementById("registerFields").style.display = isLogin ? "none" : "block";
+  document.getElementById("confirmPassword").style.display = isLogin ? "none" : "block";
+}
+
+function handleAuth(){
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+
+  if(isLogin){
+    const user = users.find(u => u.username === username && u.password === password);
+    if(!user){
+      alert("Invalid credentials");
+      return;
+    }
+    loginUser(user.fullname);
+  }else{
+    const fullname = document.getElementById("fullname").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+    if(!fullname || !email || !phone || !username || !password){
+      alert("All fields required");
+      return;
+    }
+
+    if(!validateEmail(email)){
+      alert("Invalid email format");
+      return;
+    }
+
+    if(phone.length < 10){
+      alert("Phone must be at least 10 digits");
+      return;
+    }
+
+    if(password !== confirmPassword){
+      alert("Passwords do not match");
+      return;
+    }
+
+    if(users.find(u => u.username === username)){
+      alert("Username already exists");
+      return;
+    }
+
+    if(users.find(u => u.email === email)){
+      alert("Email already registered");
+      return;
+    }
+
+    users.push({ fullname, email, phone, username, password });
+    localStorage.setItem("users", JSON.stringify(users));
+
+    alert("Registration successful. Now login.");
+    toggleForm();
+  }
+}
+
+function loginUser(name){
+  document.getElementById("authSection").style.display="none";
+  document.getElementById("securedSection").style.display="block";
+  document.getElementById("welcomeUser").textContent = "Hello, " + name;
+}
+
+function logout(){
+  document.getElementById("securedSection").style.display="none";
+  document.getElementById("authSection").style.display="block";
+}
+
+function validateEmail(email){
+  return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
+}
+</script>
+
+</body>
+</html>
